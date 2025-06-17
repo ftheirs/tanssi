@@ -26,9 +26,9 @@ use tp_bridge::symbiotic_message_processor::SymbioticMessageProcessor;
 
 use {
     crate::{
-        parameter_types, weights, xcm_config, AggregateMessageOrigin, Balance, Balances, Encode,
-        EthereumInboundQueue, EthereumOutboundQueue, EthereumSovereignAccount, EthereumSystem,
-        FixedU128, GetAggregateMessageOrigin, Keccak256, MessageQueue,
+        dynamic_params, parameter_types, weights, xcm_config, AggregateMessageOrigin, Balance,
+        Balances, Encode, EthereumInboundQueue, EthereumOutboundQueue, EthereumSovereignAccount,
+        EthereumSystem, FixedU128, GetAggregateMessageOrigin, Keccak256, MessageQueue,
         OutboundMessageCommitmentRecorder, Runtime, RuntimeEvent, SnowbridgeFeesAccount,
         TokenLocationReanchored, TransactionByteFee, TreasuryAccount, WeightToFee, UNITS,
     },
@@ -61,9 +61,6 @@ use {
 };
 
 // Ethereum Bridge
-parameter_types! {
-    pub storage EthereumGatewayAddress: H160 = H160(hex_literal::hex!("EDa338E4dC46038493b885327842fD3E301CaB39"));
-}
 
 parameter_types! {
     pub Parameters: PricingParameters<u128> = PricingParameters {
@@ -525,7 +522,7 @@ impl snowbridge_pallet_inbound_queue::Config for Runtime {
     type Token = Balances;
     // TODO: Revisit this when we enable xcmp messages
     type XcmSender = DoNothingRouter;
-    type GatewayAddress = EthereumGatewayAddress;
+    type GatewayAddress = dynamic_params::ethereum_bridge::EthereumGatewayAddress;
     // TODO: Revisit this when we enable xcmp messages
     type MessageConverter = DoNothingConvertMessage;
     type ChannelLookup = EthereumSystem;
