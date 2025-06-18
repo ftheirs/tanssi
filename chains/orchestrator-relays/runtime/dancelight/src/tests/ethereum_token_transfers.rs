@@ -18,9 +18,8 @@
 
 use {
     crate::{
-        bridge_to_ethereum_config::{EthereumGatewayAddress, NativeTokenTransferMessageProcessor},
-        tests::common::*,
-        Balances, EthereumInboundQueue, EthereumSovereignAccount, EthereumSystem,
+        bridge_to_ethereum_config::NativeTokenTransferMessageProcessor, dynamic_params,
+        tests::common::*, Balances, EthereumInboundQueue, EthereumSovereignAccount, EthereumSystem,
         EthereumTokenTransfers, ForeignAssets, ForeignAssetsCreator, RuntimeEvent,
         SnowbridgeFeesAccount, TokenLocationReanchored,
     },
@@ -936,7 +935,7 @@ fn can_process_message_returns_false_for_none_channel_info() {
 
         let envelope = Envelope {
             channel_id,
-            gateway: EthereumGatewayAddress::get(),
+            gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
             payload: create_valid_payload(),
             nonce: 1,
             message_id: H256::zero(),
@@ -969,7 +968,7 @@ fn can_process_message_returns_false_for_wrong_channel_id() {
 
         let envelope = Envelope {
             channel_id: wrong_channel_id,
-            gateway: EthereumGatewayAddress::get(),
+            gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
             payload: create_valid_payload(),
             nonce: 1,
             message_id: H256::zero(),
@@ -1005,7 +1004,7 @@ fn can_process_message_returns_false_for_wrong_para_id() {
 
         let envelope = Envelope {
             channel_id,
-            gateway: EthereumGatewayAddress::get(),
+            gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
             payload: create_valid_payload(),
             nonce: 1,
             message_id: H256::zero(),
@@ -1041,7 +1040,7 @@ fn can_process_message_returns_false_for_wrong_agent_id() {
 
         let envelope = Envelope {
             channel_id,
-            gateway: EthereumGatewayAddress::get(),
+            gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
             payload: create_valid_payload(),
             nonce: 1,
             message_id: H256::zero(),
@@ -1105,7 +1104,7 @@ fn can_process_message_returns_false_for_wrong_message_type() {
 
         let envelope = Envelope {
             channel_id,
-            gateway: EthereumGatewayAddress::get(),
+            gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
             payload: VersionedXcmMessage::V1(MessageV1 {
                 chain_id: 1,
                 command: Command::RegisterToken {
@@ -1146,7 +1145,7 @@ fn process_message_fee_lower_than_amount_ok() {
 
             let envelope = Envelope {
                 channel_id,
-                gateway: EthereumGatewayAddress::get(),
+                gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
                 payload: VersionedXcmMessage::V1(MessageV1 {
                     chain_id: 1,
                     command: Command::SendNativeToken {
@@ -1199,7 +1198,7 @@ fn process_message_fee_greater_than_amount_ok() {
 
             let envelope = Envelope {
                 channel_id,
-                gateway: EthereumGatewayAddress::get(),
+                gateway: dynamic_params::ethereum_bridge::EthereumGatewayAddress::get(),
                 payload: VersionedXcmMessage::V1(MessageV1 {
                     chain_id: 1,
                     command: Command::SendNativeToken {
