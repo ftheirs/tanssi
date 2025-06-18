@@ -22,6 +22,9 @@
 pub mod alias;
 pub mod prod_or_fast;
 
+#[cfg(test)]
+mod tests;
+
 pub use {
     alias::*,
     cumulus_primitives_core::{
@@ -145,7 +148,7 @@ pub trait GetCurrentContainerChains {
     fn set_current_container_chains(container_chains: &[ParaId]);
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum ForSession {
     Current,
     Next,
