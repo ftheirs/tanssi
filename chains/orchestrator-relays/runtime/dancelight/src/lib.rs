@@ -395,7 +395,9 @@ pub mod dynamic_params {
         use sp_core::H160;
 
         #[codec(index = 0)]
-        pub static EthereumGatewayAddress: H160 = H160(hex_literal::hex!("EDa338E4dC46038493b885327842fD3E301CaB39"));
+        pub static EthereumGatewayAddress: H160 = H160(hex_literal::hex!(
+            "EDa338E4dC46038493b885327842fD3E301CaB39"
+        ));
     }
 }
 

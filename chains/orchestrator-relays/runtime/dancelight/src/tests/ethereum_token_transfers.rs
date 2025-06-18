@@ -18,10 +18,8 @@
 
 use {
     crate::{
-        bridge_to_ethereum_config::NativeTokenTransferMessageProcessor,
-        dynamic_params,
-        tests::common::*,
-        Balances, EthereumInboundQueue, EthereumSovereignAccount, EthereumSystem,
+        bridge_to_ethereum_config::NativeTokenTransferMessageProcessor, dynamic_params,
+        tests::common::*, Balances, EthereumInboundQueue, EthereumSovereignAccount, EthereumSystem,
         EthereumTokenTransfers, ForeignAssets, ForeignAssetsCreator, RuntimeEvent,
         SnowbridgeFeesAccount, TokenLocationReanchored,
     },
