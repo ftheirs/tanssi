@@ -49,7 +49,7 @@ use {
     snowbridge_router_primitives::inbound::{
         envelope::Envelope, Command, Destination, MessageProcessor, MessageV1, VersionedXcmMessage,
     },
-    sp_core::{ConstU32, ConstU8, Get, H160, H256},
+    sp_core::{ConstU32, ConstU8, Get, H256},
     sp_runtime::{traits::Zero, DispatchError, DispatchResult},
     sp_std::{marker::PhantomData, vec},
     tp_bridge::{DoNothingConvertMessage, DoNothingRouter, EthereumSystemHandler},
@@ -61,9 +61,7 @@ use {
 };
 
 // Ethereum Bridge
-parameter_types! {
-    pub storage EthereumGatewayAddress: H160 = H160(hex_literal::hex!("EDa338E4dC46038493b885327842fD3E301CaB39"));
-}
+// EthereumGatewayAddress is now defined in dynamic_params::bridge
 
 parameter_types! {
     pub Parameters: PricingParameters<u128> = PricingParameters {
@@ -525,7 +523,7 @@ impl snowbridge_pallet_inbound_queue::Config for Runtime {
     type Token = Balances;
     // TODO: Revisit this when we enable xcmp messages
     type XcmSender = DoNothingRouter;
-    type GatewayAddress = EthereumGatewayAddress;
+    type GatewayAddress = crate::dynamic_params::bridge::EthereumGatewayAddress;
     // TODO: Revisit this when we enable xcmp messages
     type MessageConverter = DoNothingConvertMessage;
     type ChannelLookup = EthereumSystem;
