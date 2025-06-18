@@ -61,9 +61,7 @@ use {
 };
 
 // Ethereum Bridge
-parameter_types! {
-    pub storage EthereumGatewayAddress: H160 = H160(hex_literal::hex!("EDa338E4dC46038493b885327842fD3E301CaB39"));
-}
+pub type EthereumGatewayAddress = crate::dynamic_params::ethereum_bridge::GatewayAddress;
 
 parameter_types! {
     pub Parameters: PricingParameters<u128> = PricingParameters {

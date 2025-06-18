@@ -1,0 +1,197 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Build and Development Commands
+
+### Building the Node
+```bash
+# Standard build (first build takes ~30 minutes)
+cargo build --release
+
+# Build with fast runtime for testing (shorter session times)
+cargo build --features=fast-runtime --release
+
+# Build with runtime benchmarks
+cargo build --release --features=fast-runtime,runtime-benchmarks
+
+# Build specific runtimes/nodes
+cargo build -p tanssi-node --release
+cargo build -p dancebox-runtime --release
+cargo build -p container-chain-simple-node --release
+cargo build -p container-chain-frontier-node --release
+```
+
+### Running Tests
+```bash
+# Run all Rust unit tests
+cargo test --features=fast-runtime --release
+
+# Run specific pallet tests
+cargo test -p pallet-registrar
+cargo test -p pallet-collator-assignment
+
+# Run a single test
+cargo test --features=fast-runtime test_name_here
+
+# TypeScript tests (from test directory)
+cd test
+pnpm moonwall test dev_tanssi        # Manual seal orchestrator tests
+pnpm moonwall test zombie_tanssi      # Zombienet tests with container-chains
+```
+
+### Development Environment
+```bash
+# Start development node (instant seal mode)
+./target/release/tanssi-node --dev
+
+# Start with block authoring every 6 seconds
+./target/release/tanssi-node --dev --sealing 6000
+
+# Manual block authoring control
+./target/release/tanssi-node --dev --sealing manual
+
+# Spin up test environments (from test directory)
+pnpm moonwall run dev_tanssi         # Single manual-seal orchestrator
+pnpm moonwall run zombie_tanssi      # Orchestrator + two container-chains
+```
+
+### Linting and Formatting
+```bash
+# Rust formatting
+cargo fmt
+
+# Rust linting
+cargo clippy
+
+# TypeScript/JavaScript formatting
+pnpm fmt:fix
+
+# TypeScript/JavaScript linting
+pnpm lint:fix
+```
+
+### Benchmarking
+```bash
+# Run benchmarks for a specific pallet
+./tools/dev-benchmark-pallet.sh "pallet_registrar"
+
+# Run all runtime benchmarks
+./tools/benchmark-all-runtimes.sh
+```
+
+## High-Level Architecture
+
+### Runtime Structure
+Tanssi consists of four main runtimes:
+
+1. **Orchestrator Parachains** (Cumulus-based):
+   - **Dancebox**: Production orchestrator parachain
+   - **Flashbox**: Development/testing orchestrator parachain
+
+2. **Orchestrator Relay Chains** (Substrate-based):
+   - **Dancelight**: Production relay chain with governance
+   - **Starlight**: Development/staging relay chain
+
+### Core Components
+
+1. **Registrar System** (`pallets/registrar/`)
+   - Manages container chain registration/deregistration
+   - Stores genesis data and parathread parameters
+   - Implements session-delayed changes for safety
+
+2. **Collator Assignment** (`pallets/collator-assignment/`)
+   - Assigns collators to orchestrator and container chains
+   - Prioritizes orchestrator chain, then container chains (FIFO)
+   - Supports rotation modes and one-session delay
+
+3. **Author Noting** (`pallets/author-noting/`)
+   - Tracks block authors for container chains
+   - Reads headers from relay chain state
+   - Triggers rewards for authored blocks
+
+4. **Configuration** (`pallets/configuration/`)
+   - Stores host configuration parameters
+   - Controls collator counts and assignments
+   - Manages rotation periods
+
+5. **Services Payment** (`pallets/services-payment/`)
+   - Handles payment for block production services
+   - Manages credits and billing cycles
+
+### Key Design Patterns
+
+1. **Session-Based Changes**: Most configuration changes are delayed by one session for predictability
+2. **Shared Collator Pool**: Container chains don't run their own collators; Tanssi provides them
+3. **Trait-Based Architecture**: Heavy use of traits in `primitives/traits/` for modularity
+4. **Storage Proofs**: Uses relay chain storage proofs for trustless cross-chain data
+
+### Container Chain Templates
+
+1. **Simple Template**: Basic Substrate parachain with essential pallets
+2. **Frontier Template**: EVM-compatible chain with Ethereum compatibility
+
+## Fast Commit Task Behavior
+
+1. **Commit Message Format**:
+   - Use conventional commit format: `type(scope): description`
+   - Common scopes: `dancelight`, `starlight`, `dancebox`, `flashbox`, `registrar`, `collator-assignment`, `tests`
+   - Types: `feat`, `fix`, `test`, `docs`, `refactor`, `chore`
+
+2. **Automatic Behavior**:
+   - Generate 3 commit message suggestions
+   - Automatically select the first suggestion
+   - Execute commit without user confirmation
+   - Do NOT add Claude co-authorship footer
+
+## Feature Implementation Planning
+
+1. **Branch Management**:
+   - Create feature branches: `feature/<feature-name>`
+   - Ensure base branch is up to date before starting
+
+2. **Requirements Analysis**:
+   - Analyze feature requirements and acceptance criteria
+   - Understand existing codebase structure
+   - Identify potential impacts on other components
+
+3. **Task Breakdown**:
+   - Create detailed implementation plan
+   - Break into small, manageable tasks
+   - Identify dependencies between tasks
+   - Note potential technical challenges
+
+4. **Implementation Process**:
+   - Present plan to user and wait for confirmation
+   - Ask for clarification when requirements are unclear
+   - Document key decisions and assumptions
+   - Track changes to the original plan
+
+## Common Development Patterns
+
+### Adding a New Pallet
+1. Create pallet in `pallets/` directory
+2. Add to workspace `Cargo.toml`
+3. Add to runtime (Dancebox/Flashbox/Dancelight/Starlight)
+4. Update runtime configuration
+5. Add tests and benchmarks
+6. Update TypeScript interfaces if needed
+
+### Modifying Collator Assignment Logic
+1. Check `pallets/collator-assignment/src/lib.rs`
+2. Consider session delay implications
+3. Update tests in `pallets/collator-assignment/src/tests.rs`
+4. Test with both dev_tanssi and zombie_tanssi
+
+### Working with Container Chains
+1. Container chains are registered via Registrar pallet
+2. Collators are assigned automatically
+3. Author noting tracks block production
+4. Services payment handles billing
+
+## Testing Guidelines
+
+1. **Rust Tests**: Write unit tests for all new functionality
+2. **Integration Tests**: Add Moonwall tests for cross-pallet interactions
+3. **Benchmarks**: Add benchmarks for new extrinsics
+4. **Fast Runtime**: Always test with `--features=fast-runtime` for quicker sessions

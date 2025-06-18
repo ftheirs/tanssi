@@ -387,6 +387,15 @@ pub mod dynamic_params {
         #[codec(index = 1)]
         pub static ByteDeposit: Balance = deposit(0, 1);
     }
+
+    #[dynamic_pallet_params]
+    #[codec(index = 1)]
+    pub mod ethereum_bridge {
+        use super::*;
+
+        #[codec(index = 0)]
+        pub static GatewayAddress: sp_core::H160 = sp_core::H160(hex_literal::hex!("EDa338E4dC46038493b885327842fD3E301CaB39"));
+    }
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -412,6 +421,7 @@ impl EnsureOriginWithArg<RuntimeOrigin, RuntimeParametersKey> for DynamicParamet
 
         match key {
             Preimage(_) => frame_system::ensure_root(origin.clone()),
+            EthereumBridge(_) => frame_system::ensure_root(origin.clone()),
         }
         .map_err(|_| origin)
     }
