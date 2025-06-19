@@ -112,17 +112,42 @@ pub fn new_test_ext_with_genesis(config: HostConfiguration) -> sp_io::TestExtern
     .into()
 }
 
+/// Progress to the given block, triggering session and era changes as we progress.
+///
+/// This will finalize the previous block, initialize up to the given block, essentially simulating
+/// a block import/propose process where we first initialize the block, then execute some stuff (not
+/// in the function), and then finalize the block.
 pub fn run_to_block(n: u64) {
     let old_block_number = System::block_number();
     let session_len = 5;
 
     for x in (old_block_number + 1)..=n {
+        // Finalize previous block if not at genesis
+        if x > 1 {
+            <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(x - 1);
+        }
+
         System::reset_events();
         System::set_block_number(x);
 
+        // Handle session logic before general initialization
         if x % session_len == 1 {
             let session_index = (x / session_len) as u32;
             Configuration::initializer_on_new_session(&session_index);
         }
+
+        // Call on_initialize for all pallets
+        <AllPalletsWithSystem as frame_support::traits::OnInitialize<u64>>::on_initialize(x);
+
+        // Call on_idle for all pallets (with remaining weight)
+        <AllPalletsWithSystem as frame_support::traits::OnIdle<u64>>::on_idle(
+            x,
+            frame_support::weights::Weight::MAX,
+        );
+    }
+
+    // Finalize the last block
+    if n >= 1 {
+        <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(n);
     }
 }
