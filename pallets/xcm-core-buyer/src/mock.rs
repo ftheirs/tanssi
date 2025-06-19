@@ -411,18 +411,27 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
     ext
 }
 
+/// Progress to the given block, triggering session and era changes as we progress.
+///
+/// This will finalize the previous block, initialize up to the given block, essentially simulating
+/// a block import/propose process where we first initialize the block, then execute some stuff (not
+/// in the function), and then finalize the block.
 pub fn run_to_block(n: u64) {
     let old_block_number = System::block_number();
 
     for x in (old_block_number + 1)..=n {
         if x > 0 {
-            XcmCoreBuyer::on_finalize(x - 1);
-            System::on_finalize(x - 1);
+            <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(x - 1);
         }
         System::reset_events();
         System::set_block_number(x);
-        System::on_initialize(x);
-        XcmCoreBuyer::on_initialize(x);
+        <AllPalletsWithSystem as frame_support::traits::OnInitialize<u64>>::on_initialize(x);
+        
+        // Call on_idle for all pallets (with remaining weight)
+        <AllPalletsWithSystem as frame_support::traits::OnIdle<u64>>::on_idle(
+            x,
+            frame_support::weights::Weight::MAX,
+        );
     }
 }
 
