@@ -380,7 +380,7 @@ pub fn run_to_block(n: u64) {
         if x > 1 {
             <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(x - 1);
         }
-        
+
         System::reset_events();
         System::set_block_number(x);
 
@@ -395,14 +395,14 @@ pub fn run_to_block(n: u64) {
 
         // Call on_initialize for all pallets
         <AllPalletsWithSystem as frame_support::traits::OnInitialize<u64>>::on_initialize(x);
-        
+
         // Call on_idle for all pallets (with remaining weight)
         <AllPalletsWithSystem as frame_support::traits::OnIdle<u64>>::on_idle(
             x,
             frame_support::weights::Weight::MAX,
         );
     }
-    
+
     // Finalize the last block
     if n >= 1 {
         <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(n);

@@ -426,7 +426,7 @@ pub fn run_to_block(n: u64) {
         System::reset_events();
         System::set_block_number(x);
         <AllPalletsWithSystem as frame_support::traits::OnInitialize<u64>>::on_initialize(x);
-        
+
         // Call on_idle for all pallets (with remaining weight)
         <AllPalletsWithSystem as frame_support::traits::OnIdle<u64>>::on_idle(
             x,

@@ -18,9 +18,7 @@ use {
     crate as pallet_external_validators,
     frame_support::{
         assert_ok, ord_parameter_types, parameter_types,
-        traits::{
-            fungible::Mutate, ConstU32, ConstU64, ValidatorRegistration,
-        },
+        traits::{fungible::Mutate, ConstU32, ConstU64, ValidatorRegistration},
         weights::Weight,
     },
     frame_system::{self as system, EnsureSignedBy},
@@ -343,7 +341,7 @@ pub fn run_to_session(n: u32) {
 /// in the function), and then finalize the block.
 pub fn run_to_block(n: u64) {
     use frame_support::traits::{OnFinalize, OnIdle, OnInitialize};
-    
+
     let old_block_number = System::block_number();
 
     for x in old_block_number..n {
@@ -355,17 +353,17 @@ pub fn run_to_block(n: u64) {
         // Start next block
         System::reset_events();
         System::set_block_number(x + 1);
-        
+
         // Initialize new block - System first
         System::on_initialize(System::block_number());
-        
+
         // Set timestamp through inherent-like behavior
         Timestamp::set_timestamp(System::block_number() * BLOCK_TIME + INIT_TIMESTAMP);
-        
+
         // Initialize other pallets
         ExternalValidators::on_initialize(System::block_number());
         Session::on_initialize(System::block_number());
-        
+
         // Call on_idle for relevant pallets
         ExternalValidators::on_idle(System::block_number(), Weight::MAX);
         Session::on_idle(System::block_number(), Weight::MAX);
