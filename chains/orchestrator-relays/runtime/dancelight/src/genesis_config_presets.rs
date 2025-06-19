@@ -709,6 +709,7 @@ pub fn dancelight_local_testnet_genesis(
         Vec::from([
             get_authority_keys_from_seed("Alice"),
             get_authority_keys_from_seed("Bob"),
+            get_authority_keys_from_seed("Charlie"),
         ]),
         Sr25519Keyring::Alice.to_account_id(),
         None,
