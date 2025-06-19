@@ -50,10 +50,16 @@ fn test_location_chain_part_child_parachain() {
 #[test]
 fn test_location_chain_part_none() {
     // No chain part - local account
-    let location = Location::new(0, [AccountId32 { id: [0u8; 32], network: None }]);
+    let location = Location::new(
+        0,
+        [AccountId32 {
+            id: [0u8; 32],
+            network: None,
+        }],
+    );
     let chain_part = location.chain_part();
     assert_eq!(chain_part, None);
-    
+
     // No chain part - too many parents
     let location = Location::new(2, []);
     let chain_part = location.chain_part();
@@ -77,7 +83,7 @@ fn test_native_asset_reserve_local_asset() {
         fun: Fungible(1000),
     };
     let origin = Location::here();
-    
+
     assert!(NativeAssetReserve::contains(&asset, &origin));
 }
 
@@ -89,7 +95,7 @@ fn test_native_asset_reserve_parent_asset() {
         fun: Fungible(1000),
     };
     let origin = Location::parent();
-    
+
     assert!(NativeAssetReserve::contains(&asset, &origin));
 }
 
@@ -101,7 +107,7 @@ fn test_native_asset_reserve_sibling_asset() {
         fun: Fungible(1000),
     };
     let origin = Location::new(1, [Parachain(2000)]);
-    
+
     assert!(NativeAssetReserve::contains(&asset, &origin));
 }
 
@@ -113,7 +119,7 @@ fn test_native_asset_reserve_wrong_origin() {
         fun: Fungible(1000),
     };
     let wrong_origin = Location::new(1, [Parachain(3000)]);
-    
+
     assert!(!NativeAssetReserve::contains(&asset, &wrong_origin));
 }
 
@@ -125,7 +131,7 @@ fn test_native_asset_reserve_complex_location() {
         fun: Fungible(1000),
     };
     let origin = Location::here();
-    
+
     assert!(NativeAssetReserve::contains(&asset, &origin));
 }
 
@@ -150,11 +156,14 @@ type TestEthereumAssetReserve = EthereumAssetReserve<MockEthereumLocation, MockE
 fn test_ethereum_asset_reserve_valid_eth_asset() {
     // Valid Ethereum asset from Ethereum location
     let asset = Asset {
-        id: AssetId(Location::new(1, [GlobalConsensus(Ethereum { chain_id: 1 })])),
+        id: AssetId(Location::new(
+            1,
+            [GlobalConsensus(Ethereum { chain_id: 1 })],
+        )),
         fun: Fungible(1000),
     };
     let origin = MockEthereumLocation::get();
-    
+
     assert!(TestEthereumAssetReserve::contains(&asset, &origin));
 }
 
@@ -162,11 +171,14 @@ fn test_ethereum_asset_reserve_valid_eth_asset() {
 fn test_ethereum_asset_reserve_wrong_origin() {
     // Ethereum asset from wrong origin
     let asset = Asset {
-        id: AssetId(Location::new(1, [GlobalConsensus(Ethereum { chain_id: 1 })])),
+        id: AssetId(Location::new(
+            1,
+            [GlobalConsensus(Ethereum { chain_id: 1 })],
+        )),
         fun: Fungible(1000),
     };
     let wrong_origin = Location::new(1, [Parachain(2000)]);
-    
+
     assert!(!TestEthereumAssetReserve::contains(&asset, &wrong_origin));
 }
 
@@ -174,11 +186,14 @@ fn test_ethereum_asset_reserve_wrong_origin() {
 fn test_ethereum_asset_reserve_wrong_network() {
     // Asset from different network
     let asset = Asset {
-        id: AssetId(Location::new(1, [GlobalConsensus(Ethereum { chain_id: 2 })])),
+        id: AssetId(Location::new(
+            1,
+            [GlobalConsensus(Ethereum { chain_id: 2 })],
+        )),
         fun: Fungible(1000),
     };
     let origin = MockEthereumLocation::get();
-    
+
     assert!(!TestEthereumAssetReserve::contains(&asset, &origin));
 }
 
@@ -190,7 +205,7 @@ fn test_ethereum_asset_reserve_non_ethereum_asset() {
         fun: Fungible(1000),
     };
     let origin = MockEthereumLocation::get();
-    
+
     assert!(!TestEthereumAssetReserve::contains(&asset, &origin));
 }
 
@@ -198,10 +213,13 @@ fn test_ethereum_asset_reserve_non_ethereum_asset() {
 fn test_ethereum_asset_reserve_wrong_parents() {
     // Asset with wrong number of parents
     let asset = Asset {
-        id: AssetId(Location::new(0, [GlobalConsensus(Ethereum { chain_id: 1 })])),
+        id: AssetId(Location::new(
+            0,
+            [GlobalConsensus(Ethereum { chain_id: 1 })],
+        )),
         fun: Fungible(1000),
     };
     let origin = MockEthereumLocation::get();
-    
+
     assert!(!TestEthereumAssetReserve::contains(&asset, &origin));
 }

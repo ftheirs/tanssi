@@ -34,10 +34,10 @@ fn test_asset_id_encoding() {
 fn test_asset_id_native_variant() {
     // Test that Native is the only variant and encodes as expected
     let native = AssetId::Native;
-    
+
     // Test encoding size
     assert!(native.encoded_size() > 0);
-    
+
     // Test round-trip encoding
     let encoded = native.encode();
     let decoded = AssetId::decode(&mut &encoded[..]).unwrap();
@@ -48,7 +48,7 @@ fn test_asset_id_native_variant() {
 #[test]
 fn test_time_unit_encoding() {
     let units = vec![TimeUnit::BlockNumber, TimeUnit::Timestamp];
-    
+
     for unit in units {
         let encoded = unit.encode();
         let decoded = TimeUnit::decode(&mut &encoded[..]).unwrap();
@@ -61,11 +61,11 @@ fn test_time_unit_variants() {
     // Test BlockNumber variant
     let block_number = TimeUnit::BlockNumber;
     assert!(matches!(block_number, TimeUnit::BlockNumber));
-    
+
     // Test Timestamp variant
     let timestamp = TimeUnit::Timestamp;
     assert!(matches!(timestamp, TimeUnit::Timestamp));
-    
+
     // Test that they encode differently
     let bn_encoded = block_number.encode();
     let ts_encoded = timestamp.encode();
@@ -77,7 +77,7 @@ fn test_time_unit_encoded_size() {
     // Both variants should have the same encoded size
     let block_number = TimeUnit::BlockNumber;
     let timestamp = TimeUnit::Timestamp;
-    
+
     assert_eq!(block_number.encoded_size(), timestamp.encoded_size());
 }
 
@@ -90,62 +90,62 @@ fn test_time_unit_encoded_size() {
 mod type_derivations {
     use super::*;
     use scale_info::TypeInfo;
-    
+
     #[test]
     fn test_asset_id_type_info() {
         // Ensure AssetId implements TypeInfo (required for runtime types)
         let _type_info = AssetId::type_info();
     }
-    
+
     #[test]
     fn test_time_unit_type_info() {
         // Ensure TimeUnit implements TypeInfo
         let _type_info = TimeUnit::type_info();
     }
-    
+
     #[test]
     fn test_asset_id_traits() {
         // Test that AssetId has all required traits
         let asset = AssetId::Native;
-        
+
         // Test Clone
         let cloned = asset.clone();
         assert_eq!(asset, cloned);
-        
+
         // Test Copy (implicitly tested by not moving)
         let _copy1 = asset;
         let _copy2 = asset;
-        
+
         // Test Debug
         let _debug_str = format!("{:?}", asset);
-        
+
         // Test PartialEq and Eq (already tested above)
     }
-    
+
     #[test]
     fn test_time_unit_traits() {
         // Test that TimeUnit has all required traits
         let unit = TimeUnit::BlockNumber;
-        
+
         // Test Clone
         let cloned = unit.clone();
         assert_eq!(unit, cloned);
-        
+
         // Test Copy
         let _copy1 = unit;
         let _copy2 = unit;
-        
+
         // Test Debug
         let _debug_str = format!("{:?}", unit);
     }
-    
+
     #[test]
     fn test_max_encoded_len() {
         use parity_scale_codec::MaxEncodedLen;
-        
+
         // Test that AssetId implements MaxEncodedLen
         let _max_len = AssetId::max_encoded_len();
-        
+
         // Test that TimeUnit implements MaxEncodedLen
         let _max_len = TimeUnit::max_encoded_len();
     }

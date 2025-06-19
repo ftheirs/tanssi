@@ -18,17 +18,15 @@
 
 use {
     crate::{
-        AuthorNotingHook, AuthorNotingInfo, CollatorAssignmentHook, CollatorAssignmentTip,
-        ContainerChainBlockInfo, ContainerChainGenesisDataItem, DistributeRewards,
-        ForSession, ParaIdAssignmentHooks, ParathreadParams, RelayStorageRootProvider, 
-        RemoveInvulnerables, SessionContainerChains, ShouldRotateAllCollators, SlotFrequency, 
-        StorageDeposit, BytesDeposit,
+        AuthorNotingHook, AuthorNotingInfo, BytesDeposit, CollatorAssignmentHook,
+        CollatorAssignmentTip, ContainerChainBlockInfo, ContainerChainGenesisDataItem,
+        DistributeRewards, ForSession, ParaIdAssignmentHooks, ParathreadParams,
+        RelayStorageRootProvider, RemoveInvulnerables, SessionContainerChains,
+        ShouldRotateAllCollators, SlotFrequency, StorageDeposit,
     },
     cumulus_primitives_core::{relay_chain::Slot, ParaId},
     dp_chain_state_snapshot::ReadEntryErr,
-    frame_support::{
-        pallet_prelude::{Get, Weight},
-    },
+    frame_support::pallet_prelude::{Get, Weight},
     parity_scale_codec::{Decode, Encode},
     sp_runtime::DispatchError,
     sp_std::{
@@ -47,18 +45,18 @@ fn test_container_chain_genesis_data_item_encoding() {
     // Test encoding and decoding of ContainerChainGenesisDataItem
     let key = b"test_key".to_vec();
     let value = b"test_value".to_vec();
-    
+
     let item = ContainerChainGenesisDataItem {
         key: key.clone(),
         value: value.clone(),
     };
-    
+
     // Test encoding
     let encoded = item.encode();
-    
+
     // Test decoding
     let decoded = ContainerChainGenesisDataItem::decode(&mut &encoded[..]).unwrap();
-    
+
     assert_eq!(decoded.key, key);
     assert_eq!(decoded.value, value);
 }
@@ -68,9 +66,9 @@ fn test_container_chain_genesis_data_item_from_tuple() {
     // Test conversion from tuple
     let key = b"test_key".to_vec();
     let value = b"test_value".to_vec();
-    
+
     let item: ContainerChainGenesisDataItem = (key.clone(), value.clone()).into();
-    
+
     assert_eq!(item.key, key);
     assert_eq!(item.value, value);
 }
@@ -82,44 +80,44 @@ fn test_container_chain_genesis_data_item_from_tuple() {
 #[cfg(test)]
 mod native_storage_reader_tests {
     use super::*;
-    use crate::{NativeStorageReader, GenericStorageReader};
+    use crate::{GenericStorageReader, NativeStorageReader};
     use frame_support::storage::unhashed;
-    
+
     #[test]
     fn test_native_storage_reader_read_existing() {
         // This test uses TestExternalities to simulate native storage
         sp_io::TestExternalities::default().execute_with(|| {
             let key = b"test_key";
             let test_data = TestData { value: 456 };
-            
+
             // Put data in storage
             unhashed::put(key, &test_data);
-            
+
             // Read using NativeStorageReader
             let reader = NativeStorageReader;
             let result: TestData = reader.read_entry(key, None).unwrap();
             assert_eq!(result.value, 456);
         });
     }
-    
+
     #[test]
     fn test_native_storage_reader_read_with_fallback() {
         sp_io::TestExternalities::default().execute_with(|| {
             let key = b"non_existent_key";
             let fallback = TestData { value: 789 };
-            
+
             // Read non-existent key with fallback
             let reader = NativeStorageReader;
             let result: TestData = reader.read_entry(key, Some(fallback)).unwrap();
             assert_eq!(result.value, 789);
         });
     }
-    
+
     #[test]
     fn test_native_storage_reader_read_absent() {
         sp_io::TestExternalities::default().execute_with(|| {
             let key = b"non_existent_key";
-            
+
             // Read non-existent key without fallback
             let reader = NativeStorageReader;
             let result: Result<TestData, ReadEntryErr> = reader.read_entry(key, None);
@@ -139,16 +137,16 @@ fn test_slot_frequency_default() {
 #[test]
 fn test_slot_frequency_should_parathread_buy_core() {
     let freq = SlotFrequency { min: 10, max: 20 };
-    
+
     // Test case 1: Should buy core
     // last_block_slot + min - max_slot_required = 85 + 10 - 5 = 90
     // current_slot (95) >= 90, so should buy
     let current_slot = Slot::from(95);
     let max_slot_required = Slot::from(5);
     let last_block_slot = Slot::from(85);
-    
+
     assert!(freq.should_parathread_buy_core(current_slot, max_slot_required, last_block_slot));
-    
+
     // Test case 2: Should not buy core yet
     // last_block_slot + min - max_slot_required = 85 + 10 - 5 = 90
     // current_slot (89) < 90, so should not buy
@@ -159,12 +157,12 @@ fn test_slot_frequency_should_parathread_buy_core() {
 #[test]
 fn test_slot_frequency_should_parathread_author_block() {
     let freq = SlotFrequency { min: 10, max: 20 };
-    
+
     // Test case 1: Should author block
     let current_slot = Slot::from(100);
     let last_block_slot = Slot::from(90);
     assert!(freq.should_parathread_author_block(current_slot, last_block_slot));
-    
+
     // Test case 2: Should not author block yet
     let current_slot = Slot::from(95);
     assert!(!freq.should_parathread_author_block(current_slot, last_block_slot));
@@ -178,7 +176,7 @@ fn test_author_noting_info_creation() {
         block_number: 100,
         para_id: ParaId::from(1000),
     };
-    
+
     assert_eq!(info.author, 42u64);
     assert_eq!(info.block_number, 100);
     assert_eq!(info.para_id, ParaId::from(1000));
@@ -199,10 +197,10 @@ fn test_container_chain_block_info_encoding() {
         author: 456u64,
         latest_slot_number: Slot::from(789),
     };
-    
+
     let encoded = info.encode();
     let decoded = ContainerChainBlockInfo::<u64>::decode(&mut &encoded[..]).unwrap();
-    
+
     assert_eq!(decoded.block_number, 123);
     assert_eq!(decoded.author, 456u64);
     assert_eq!(decoded.latest_slot_number, Slot::from(789));
@@ -222,7 +220,7 @@ fn test_session_container_chains_encoding() {
     let params = ParathreadParams {
         slot_frequency: SlotFrequency { min: 5, max: 10 },
     };
-    
+
     let chains = SessionContainerChains {
         parachains: vec![ParaId::from(1000), ParaId::from(2000)],
         parathreads: vec![
@@ -230,10 +228,10 @@ fn test_session_container_chains_encoding() {
             (ParaId::from(4000), params),
         ],
     };
-    
+
     let encoded = chains.encode();
     let decoded = SessionContainerChains::decode(&mut &encoded[..]).unwrap();
-    
+
     assert_eq!(decoded.parachains.len(), 2);
     assert_eq!(decoded.parathreads.len(), 2);
     assert_eq!(decoded.parachains[0], ParaId::from(1000));
@@ -251,10 +249,8 @@ fn test_collator_assignment_tip_default() {
 #[test]
 fn test_distribute_rewards_default() {
     struct MockImbalance;
-    let result = <() as DistributeRewards<u64, MockImbalance>>::distribute_rewards(
-        42u64,
-        MockImbalance,
-    );
+    let result =
+        <() as DistributeRewards<u64, MockImbalance>>::distribute_rewards(42u64, MockImbalance);
     assert!(result.is_ok());
 }
 
@@ -289,14 +285,14 @@ impl<const N: u128> Get<u128> for ConstU128<N> {
 #[test]
 fn test_bytes_deposit_compute() {
     type TestDeposit = BytesDeposit<ConstU128<100>, ConstU128<10>>;
-    
+
     // Test with small data
     let small_data = vec![1u8, 2, 3];
     let deposit = TestDeposit::compute_deposit(&small_data).unwrap();
     // Vec encoding: compact length (1 byte for length 3) + 3 bytes = 4 bytes total
     // Base cost (100) + 4 bytes * 10 = 140
     assert_eq!(deposit, 140u128);
-    
+
     // Test with larger data
     let large_data = vec![0u8; 50];
     let deposit = TestDeposit::compute_deposit(&large_data).unwrap();
@@ -310,14 +306,14 @@ fn test_bytes_deposit_compute() {
 fn test_para_id_assignment_hooks_default() {
     let mut para_ids = vec![ParaId::from(1000), ParaId::from(2000)];
     let old_assigned = BTreeSet::new();
-    
+
     <() as ParaIdAssignmentHooks<u128, u64>>::pre_assignment(&mut para_ids, &old_assigned);
     assert_eq!(para_ids.len(), 2); // No change
-    
+
     let current_assigned = BTreeSet::new();
     let mut new_assigned = BTreeMap::new();
     let tip = Some(100u128);
-    
+
     let weight = <() as ParaIdAssignmentHooks<u128, u64>>::post_assignment(
         &current_assigned,
         &mut new_assigned,
@@ -343,7 +339,7 @@ impl<AccountId> AuthorNotingHook<AccountId> for MockAuthorNotingHook {
     fn on_container_authors_noted(_info: &[AuthorNotingInfo<AccountId>]) -> Weight {
         Weight::from_parts(200, 0)
     }
-    
+
     #[cfg(feature = "runtime-benchmarks")]
     fn prepare_worst_case_for_bench(_author: &AccountId, _block_number: u32, _para_id: ParaId) {}
 }
@@ -352,13 +348,9 @@ impl<AccountId> AuthorNotingHook<AccountId> for MockAuthorNotingHook {
 fn test_collator_assignment_hook_tuple() {
     // Test tuple implementation
     type TupleHook = (MockCollatorAssignmentHook, MockCollatorAssignmentHook);
-    
-    let result = TupleHook::on_collators_assigned(
-        ParaId::from(1000),
-        Some(&100u128),
-        false,
-    );
-    
+
+    let result = TupleHook::on_collators_assigned(ParaId::from(1000), Some(&100u128), false);
+
     assert!(result.is_ok());
     // Should be 100 + 100 = 200
     assert_eq!(result.unwrap(), Weight::from_parts(200, 0));
@@ -368,15 +360,13 @@ fn test_collator_assignment_hook_tuple() {
 fn test_author_noting_hook_tuple() {
     // Test tuple implementation
     type TupleHook = (MockAuthorNotingHook, MockAuthorNotingHook);
-    
-    let info = vec![
-        AuthorNotingInfo {
-            author: 42u64,
-            block_number: 100,
-            para_id: ParaId::from(1000),
-        },
-    ];
-    
+
+    let info = vec![AuthorNotingInfo {
+        author: 42u64,
+        block_number: 100,
+        para_id: ParaId::from(1000),
+    }];
+
     let weight = TupleHook::on_container_authors_noted(&info);
     // Should be 200 + 200 = 400
     assert_eq!(weight, Weight::from_parts(400, 0));

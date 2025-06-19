@@ -26,9 +26,13 @@ use {
 fn test_container_chain_genesis_data_encoding() {
     // Create test genesis data
     let mut storage = BoundedVec::try_from(vec![]).unwrap();
-    storage.try_push((b"key1".to_vec(), b"value1".to_vec()).into()).unwrap();
-    storage.try_push((b"key2".to_vec(), b"value2".to_vec()).into()).unwrap();
-    
+    storage
+        .try_push((b"key1".to_vec(), b"value1".to_vec()).into())
+        .unwrap();
+    storage
+        .try_push((b"key2".to_vec(), b"value2".to_vec()).into())
+        .unwrap();
+
     let genesis_data = ContainerChainGenesisData {
         storage: storage.clone(),
         name: b"test-chain".to_vec().try_into().unwrap(),
@@ -40,13 +44,13 @@ fn test_container_chain_genesis_data_encoding() {
             is_ethereum: false,
         },
     };
-    
+
     // Test encoding
     let encoded = genesis_data.encode();
-    
+
     // Test decoding
     let decoded = ContainerChainGenesisData::decode(&mut &encoded[..]).unwrap();
-    
+
     assert_eq!(decoded.storage, storage);
     assert_eq!(decoded.name, genesis_data.name);
     assert_eq!(decoded.id, genesis_data.id);
@@ -58,7 +62,7 @@ fn test_container_chain_genesis_data_encoding() {
 #[test]
 fn test_container_chain_genesis_data_default() {
     let genesis_data = ContainerChainGenesisData::default();
-    
+
     assert!(genesis_data.storage.is_empty());
     assert!(genesis_data.name.is_empty());
     assert!(genesis_data.id.is_empty());
@@ -70,8 +74,10 @@ fn test_container_chain_genesis_data_default() {
 #[test]
 fn test_container_chain_genesis_data_with_ethereum_properties() {
     let mut storage = BoundedVec::try_from(vec![]).unwrap();
-    storage.try_push((b":code".to_vec(), vec![1, 2, 3]).into()).unwrap();
-    
+    storage
+        .try_push((b":code".to_vec(), vec![1, 2, 3]).into())
+        .unwrap();
+
     let genesis_data = ContainerChainGenesisData {
         storage,
         name: b"ethereum-chain".to_vec().try_into().unwrap(),
@@ -83,7 +89,7 @@ fn test_container_chain_genesis_data_with_ethereum_properties() {
             is_ethereum: true,
         },
     };
-    
+
     assert!(genesis_data.properties.is_ethereum);
 }
 
@@ -91,7 +97,7 @@ fn test_container_chain_genesis_data_with_ethereum_properties() {
 fn test_container_chain_genesis_data_storage_limits() {
     // Test with maximum allowed storage items
     let mut storage = BoundedVec::try_from(vec![]).unwrap();
-    
+
     // Add items until we reach the bound (this will depend on the actual bound in the type)
     for i in 0..100 {
         let key = format!("key{}", i).into_bytes();
@@ -101,7 +107,7 @@ fn test_container_chain_genesis_data_storage_limits() {
             Err(_) => break,
         }
     }
-    
+
     let genesis_data = ContainerChainGenesisData {
         storage,
         name: Default::default(),
@@ -110,7 +116,7 @@ fn test_container_chain_genesis_data_storage_limits() {
         extensions: Default::default(),
         properties: Default::default(),
     };
-    
+
     // Ensure we can encode and decode even with many items
     let encoded = genesis_data.encode();
     let decoded = ContainerChainGenesisData::decode(&mut &encoded[..]).unwrap();
@@ -125,12 +131,12 @@ fn test_genesis_data_item_ordering() {
         (b"a_first".to_vec(), b"value2".to_vec()),
         (b"m_middle".to_vec(), b"value3".to_vec()),
     ];
-    
+
     let mut storage = BoundedVec::try_from(vec![]).unwrap();
     for item in &items {
         storage.try_push(item.clone().into()).unwrap();
     }
-    
+
     let genesis_data = ContainerChainGenesisData {
         storage: storage.clone(),
         name: Default::default(),
@@ -139,7 +145,7 @@ fn test_genesis_data_item_ordering() {
         extensions: Default::default(),
         properties: Default::default(),
     };
-    
+
     // Verify order is preserved
     for (i, item) in genesis_data.storage.iter().enumerate() {
         assert_eq!(item.key, items[i].0);
@@ -150,7 +156,7 @@ fn test_genesis_data_item_ordering() {
 #[test]
 fn test_properties_token_metadata() {
     use dp_container_chain_genesis_data::TokenMetadata;
-    
+
     let properties = Properties {
         token_metadata: TokenMetadata {
             token_symbol: b"TEST".to_vec().try_into().unwrap(),
@@ -159,14 +165,14 @@ fn test_properties_token_metadata() {
         },
         is_ethereum: false,
     };
-    
+
     assert_eq!(properties.token_metadata.token_decimals, 18);
     assert_eq!(properties.token_metadata.ss58_format, 42);
-    
+
     // Test encoding/decoding of properties
     let encoded = properties.encode();
     let decoded = Properties::decode(&mut &encoded[..]).unwrap();
-    
+
     assert_eq!(decoded.token_metadata.token_decimals, 18);
     assert_eq!(decoded.token_metadata.ss58_format, 42);
     assert_eq!(decoded.is_ethereum, false);
