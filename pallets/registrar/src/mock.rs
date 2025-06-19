@@ -447,11 +447,11 @@ pub fn run_to_block(n: u64) {
 }
 
 pub fn end_block() {
-    ParaRegistrar::on_finalize(System::block_number());
+    <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(System::block_number());
 }
 
 pub fn start_block() {
-    ParaRegistrar::on_finalize(System::block_number());
+    <AllPalletsWithSystem as frame_support::traits::OnInitialize<u64>>::on_initialize(System::block_number());
 }
 
 pub fn get_ed25519_pairs(num: u32) -> Vec<ed25519::Pair> {
