@@ -16,6 +16,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(test)]
+mod tests;
+
 use frame_support::traits::Get;
 use xcm::latest::prelude::*;
 trait Parse {

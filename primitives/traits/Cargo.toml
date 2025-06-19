@@ -25,6 +25,11 @@ sp-std = { workspace = true }
 # Cumulus
 cumulus-primitives-core = { workspace = true }
 
+[dev-dependencies]
+sp-io = { workspace = true }
+sp-state-machine = { workspace = true }
+sp-trie = { workspace = true }
+
 [features]
 default = [ "std" ]
 std = [
