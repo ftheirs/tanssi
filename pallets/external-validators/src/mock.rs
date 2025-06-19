@@ -19,8 +19,9 @@ use {
     frame_support::{
         assert_ok, ord_parameter_types, parameter_types,
         traits::{
-            fungible::Mutate, ConstU32, ConstU64, OnFinalize, OnInitialize, ValidatorRegistration,
+            fungible::Mutate, ConstU32, ConstU64, ValidatorRegistration,
         },
+        weights::Weight,
     },
     frame_system::{self as system, EnsureSignedBy},
     pallet_balances::AccountData,
@@ -335,19 +336,40 @@ pub fn run_to_session(n: u32) {
     run_to_block(block_number + 1);
 }
 
+/// Progress to the given block, triggering session and era changes as we progress.
+///
+/// This will finalize the previous block, initialize up to the given block, essentially simulating
+/// a block import/propose process where we first initialize the block, then execute some stuff (not
+/// in the function), and then finalize the block.
 pub fn run_to_block(n: u64) {
+    use frame_support::traits::{OnFinalize, OnIdle, OnInitialize};
+    
     let old_block_number = System::block_number();
 
     for x in old_block_number..n {
+        // Finalize current block
         ExternalValidators::on_finalize(System::block_number());
         Session::on_finalize(System::block_number());
+        System::on_finalize(System::block_number());
 
+        // Start next block
         System::reset_events();
         System::set_block_number(x + 1);
+        
+        // Initialize new block - System first
+        System::on_initialize(System::block_number());
+        
+        // Set timestamp through inherent-like behavior
         Timestamp::set_timestamp(System::block_number() * BLOCK_TIME + INIT_TIMESTAMP);
-
+        
+        // Initialize other pallets
         ExternalValidators::on_initialize(System::block_number());
         Session::on_initialize(System::block_number());
+        
+        // Call on_idle for relevant pallets
+        ExternalValidators::on_idle(System::block_number(), Weight::MAX);
+        Session::on_idle(System::block_number(), Weight::MAX);
+        System::on_idle(System::block_number(), Weight::MAX);
     }
 }
 

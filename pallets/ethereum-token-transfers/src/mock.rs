@@ -238,12 +238,35 @@ pub const ALICE: u64 = 1;
 pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;
 
+/// Progress to the given block, triggering session and era changes as we progress.
+///
+/// This will finalize the previous block, initialize up to the given block, essentially simulating
+/// a block import/propose process where we first initialize the block, then execute some stuff (not
+/// in the function), and then finalize the block.
 pub fn run_to_block(n: u64) {
-    let old_block_number = System::block_number();
-
-    for x in old_block_number..n {
+    let current_block = System::block_number();
+    
+    // Progress blocks one by one
+    for block_number in (current_block + 1)..=n {
+        // Set block number
+        System::set_block_number(block_number);
+        
+        // Reset events before initializing the new block
         System::reset_events();
-        System::set_block_number(x + 1);
-        Timestamp::set_timestamp(System::block_number() * BLOCK_TIME + INIT_TIMESTAMP);
+        
+        // Call on_initialize for all pallets
+        <AllPalletsWithSystem as frame_support::traits::OnInitialize<u64>>::on_initialize(block_number);
+        
+        // Set timestamp after initialization
+        Timestamp::set_timestamp(block_number * BLOCK_TIME + INIT_TIMESTAMP);
+        
+        // Call on_idle for all pallets (with remaining weight)
+        <AllPalletsWithSystem as frame_support::traits::OnIdle<u64>>::on_idle(
+            block_number,
+            frame_support::weights::Weight::MAX,
+        );
+        
+        // Call on_finalize for all pallets
+        <AllPalletsWithSystem as frame_support::traits::OnFinalize<u64>>::on_finalize(block_number);
     }
 }
