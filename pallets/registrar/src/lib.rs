@@ -33,6 +33,9 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod genesis_data_tests;
+
 #[cfg(any(test, feature = "runtime-benchmarks"))]
 mod benchmark_blob;
 #[cfg(any(test, feature = "runtime-benchmarks"))]
