@@ -61,8 +61,11 @@ use {
 };
 
 // Ethereum Bridge
-parameter_types! {
-    pub storage EthereumGatewayAddress: H160 = H160(hex_literal::hex!("EDa338E4dC46038493b885327842fD3E301CaB39"));
+pub struct EthereumGatewayAddress;
+impl Get<H160> for EthereumGatewayAddress {
+    fn get() -> H160 {
+        crate::dynamic_params::ethereum::GatewayAddress::get()
+    }
 }
 
 parameter_types! {
