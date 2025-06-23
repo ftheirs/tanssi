@@ -82,7 +82,7 @@ use {
         ChannelId, PricingParameters,
     },
     snowbridge_pallet_outbound_queue::MerkleProof,
-    sp_core::{storage::well_known_keys as StorageWellKnownKeys, Get},
+    sp_core::{storage::well_known_keys as StorageWellKnownKeys, Get, H160},
     sp_genesis_builder::PresetId,
     sp_runtime::{
         traits::{BlockNumberProvider, ConvertInto},
@@ -387,6 +387,17 @@ pub mod dynamic_params {
         #[codec(index = 1)]
         pub static ByteDeposit: Balance = deposit(0, 1);
     }
+
+    #[dynamic_pallet_params]
+    #[codec(index = 1)]
+    pub mod ethereum {
+        use super::*;
+
+        #[codec(index = 0)]
+        pub static GatewayAddress: H160 = H160(hex_literal::hex!(
+            "EDa338E4dC46038493b885327842fD3E301CaB39"
+        ));
+    }
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -412,6 +423,7 @@ impl EnsureOriginWithArg<RuntimeOrigin, RuntimeParametersKey> for DynamicParamet
 
         match key {
             Preimage(_) => frame_system::ensure_root(origin.clone()),
+            Ethereum(_) => frame_system::ensure_root(origin.clone()),
         }
         .map_err(|_| origin)
     }
