@@ -90,9 +90,9 @@ describeSuite({
                     // Find the PooledStake hold
                     let pooledStakeHold = 0n;
                     for (const hold of actualHolds) {
-                        if (hold.id.toHuman() === 'poolstak0x506f6f6c6564537461' || 
-                            hold.id.toHuman() === 'PooledStake' ||
-                            hold.id.toHex() === '0x706f6f6c7374616b506f6f6c6564537461') {
+                        const holdId = hold.id.toHuman() as any;
+                        // The hold ID is a nested structure: { PooledStaking: 'PooledStake' }
+                        if (holdId && holdId.PooledStaking === 'PooledStake') {
                             pooledStakeHold = hold.amount.toBigInt();
                             break;
                         }
@@ -124,9 +124,9 @@ describeSuite({
                 for (const [delegator, _] of delegatorTotalHolds) {
                     const actualHolds = await api.query.balances.holds(delegator);
                     for (const hold of actualHolds) {
-                        if (hold.id.toHuman() === 'poolstak0x506f6f6c6564537461' || 
-                            hold.id.toHuman() === 'PooledStake' ||
-                            hold.id.toHex() === '0x706f6f6c7374616b506f6f6c6564537461') {
+                        const holdId = hold.id.toHuman() as any;
+                        // The hold ID is a nested structure: { PooledStaking: 'PooledStake' }
+                        if (holdId && holdId.PooledStaking === 'PooledStake') {
                             totalActualHolds += hold.amount.toBigInt();
                             break;
                         }
